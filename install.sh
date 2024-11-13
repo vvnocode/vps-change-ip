@@ -130,17 +130,21 @@ setup_crontab() {
     # 创建临时文件
     TEMP_CRON=$(mktemp)
     
-    # 获取当前的crontab内容，排除change_ip相关行
-    crontab -l 2>/dev/null | grep -v "change_ip" > "$TEMP_CRON" || true
-    
-    # 确保文件以换行符结尾
-    if [ -s "$TEMP_CRON" ] && [ "$(tail -c1 "$TEMP_CRON" | wc -l)" -eq 0 ]; then
-        echo "" >> "$TEMP_CRON"
+    # 保存非change_ip的现有定时任务
+    if crontab -l >/dev/null 2>&1; then
+        crontab -l | grep -v "change_ip" > "$TEMP_CRON"
+    else
+        touch "$TEMP_CRON"
     fi
     
-    # 添加新的定时任务
-    echo "*/30 * * * * $INSTALL_DIR/change_ip_check.sh" >> "$TEMP_CRON"
-    echo "0 6 * * * $INSTALL_DIR/change_ip_scheduled.sh" >> "$TEMP_CRON"
+    # 确保文件以换行符结尾
+    [ -s "$TEMP_CRON" ] && echo "" >> "$TEMP_CRON"
+    
+    # 添加新的定时任务（只添加一次）
+    {
+        echo "*/30 * * * * $INSTALL_DIR/change_ip_check.sh"
+        echo "0 6 * * * $INSTALL_DIR/change_ip_scheduled.sh"
+    } >> "$TEMP_CRON"
     
     # 应用新的crontab配置
     crontab "$TEMP_CRON"
@@ -149,11 +153,21 @@ setup_crontab() {
     rm -f "$TEMP_CRON"
     
     echo "验证定时任务..."
-    crontab -l | grep "change_ip"
+    # 只显示一次验证结果
+    crontab -l | grep "change_ip" | sort | uniq
 }
 
-# 调用setup_crontab函数
+# 安装完成提示
+finish_install() {
+    echo -e "\n=== 安装完成！ ==="
+    echo "定时任务已配置："
+    echo "- 每30分钟检查一次IP状态"
+    echo "- 每天6:00自动更换IP"
+}
+
+# 调用函数
 setup_crontab
+finish_install
 
 # 验证安装
 echo -e "\n=== 安装完成！ ==="
