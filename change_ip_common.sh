@@ -10,7 +10,7 @@ TELEGRAM_API_URL="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage"
 LOG_FILE="change_ip.log" # 日志文件
 
 # 读取配置文件
-CONFIG_FILE="config.yaml"
+CONFIG_FILE="$(dirname "$0")/config.yaml"
 
 # 解析配置文件中的变量
 TELEGRAM_BOT_TOKEN=$(grep "^telegram_bot_token:" $CONFIG_FILE | cut -d'"' -f2)

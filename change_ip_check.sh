@@ -3,7 +3,7 @@
 #!/bin/bash
 # change_ip_check.sh
 # 引入通用功能模块
-source ./change_ip_common.sh
+source "$(dirname "$0")/change_ip_common.sh"
 
 # 检查当前IP是否被封锁
 check_ip_status() {
