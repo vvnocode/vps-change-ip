@@ -122,42 +122,35 @@ else
     sed -i "s|^log_file: .*|log_file: \"$INSTALL_DIR/logs/change_ip.log\"|" config.yaml
 fi
 
-# 配置 crontab
-echo "正在配置定时任务..."
-crontab -l > mycron 2>/dev/null || echo "" > mycron
-check_schedule=$(grep "^cron_check_schedule:" config.yaml | cut -d'"' -f2)
-check_script=$(grep "^cron_check_script:" config.yaml | cut -d'"' -f2)
-change_schedule=$(grep "^cron_change_schedule:" config.yaml | cut -d'"' -f2)
-change_script=$(grep "^cron_change_script:" config.yaml | cut -d'"' -f2)
+# 配置定时任务
+setup_crontab() {
+    echo -e "\n=== 验证安装 ==="
+    echo "配置定时任务..."
+    
+    # 获取当前的crontab内容
+    crontab -l > crontab.tmp 2>/dev/null || touch crontab.tmp
+    
+    # 删除已存在的change_ip相关任务
+    sed -i.bak '/change_ip/d' crontab.tmp
+    
+    # 添加新的定时任务
+    echo "*/30 * * * * $INSTALL_DIR/change_ip_check.sh" >> crontab.tmp
+    echo "0 6 * * * $INSTALL_DIR/change_ip_scheduled.sh" >> crontab.tmp
+    
+    # 应用新的crontab配置
+    crontab crontab.tmp
+    
+    # 清理临时文件
+    rm -f crontab.tmp crontab.tmp.bak
+    
+    echo "验证定时任务..."
+    crontab -l | grep "change_ip"
+}
 
-# 验证定时任务配置
-if [ -z "$check_schedule" ] || [ -z "$check_script" ] || [ -z "$change_schedule" ] || [ -z "$change_script" ]; then
-    echo "错误：获取定时任务配置失败"
-    exit 1
-fi
-
-# 添加定时任务
-echo "$check_schedule $check_script" >> mycron
-echo "$change_schedule $change_script" >> mycron
-
-# 安装新的crontab
-if ! crontab mycron; then
-    echo "错误：安装定时任务失败"
-    rm mycron
-    exit 1
-fi
-rm mycron
+# 调用setup_crontab函数
+setup_crontab
 
 # 验证安装
-echo -e "\n=== 验证安装 ==="
-if [ ! -f "config.yaml" ]; then
-    echo "错误：配置文件不存在"
-    exit 1
-fi
-
-echo "验证定时任务..."
-crontab -l | grep "change_ip" || { echo "错误：定时任务未设置成功"; exit 1; }
-
 echo -e "\n=== 安装完成！ ==="
 echo "安装目录: $INSTALL_DIR"
 echo "配置文件: $INSTALL_DIR/config.yaml"
