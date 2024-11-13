@@ -33,3 +33,7 @@
 
 4. 验证
 	`crontab -l`
+
+## 卸载
+
+`bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/refs/heads/main/uninstall.sh)`
