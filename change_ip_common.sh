@@ -42,10 +42,26 @@ notify() {
     local timestamp=$(current_timestamp)
     local formatted_message="[$timestamp] $message"
 
-    # 发送消息到Telegram
-    curl -s -X POST "$TELEGRAM_API_URL" \
+    # 发送消息到Telegram并记录结果
+    local response
+    response=$(curl -s -X POST "$TELEGRAM_API_URL" \
         -d chat_id="$TELEGRAM_CHAT_ID" \
-        -d text="$formatted_message" > /dev/null
+        -d text="$formatted_message" 2>&1)
+    
+    # 检查curl是否成功执行
+    if [ $? -ne 0 ]; then
+        echo "[$timestamp] Telegram通知发送失败: curl执行错误" >> "$LOG_FILE"
+        return 1
+    fi
+
+    # 检查Telegram API响应
+    if ! echo "$response" | grep -q '"ok":true'; then
+        echo "[$timestamp] Telegram通知发送失败: $response" >> "$LOG_FILE"
+        return 1
+    fi
+
+    echo "[$timestamp] Telegram通知发送成功" >> "$LOG_FILE"
+    return 0
 }
 
 # 换IP操作
@@ -58,6 +74,9 @@ change_ip() {
 
 # 打印日志并发送到Telegram
 log_and_notify() {
-    log "$1"
-    notify "$1"
+    local message="$1"
+    log "$message"
+    if ! notify "$message"; then
+        log "警告：Telegram通知发送失败"
+    fi
 }
