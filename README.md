@@ -3,7 +3,21 @@
 
 ## 使用
 
-配置定时任务
+### 配追
+
+将`config.yaml.example`复制为`config.yaml`，配置文件中需要配置以下内容：
+
+- `telegram_bot_token`：Telegram Bot Token
+- `telegram_chat_id`：Telegram Chat ID
+- `ip_change_api`：IP更换API
+- `log_file`：日志文件路径
+
+#### 使用install.sh安装(推荐)
+
+1. `chmod +x install.sh`
+2. `./install.sh`
+
+#### 手动配置定时任务
 
 1. `chmod +x change_ip_*.sh`
 2. `crontab -e`

@@ -9,6 +9,18 @@ IP_CHANGE_API=""               # 替换为实际的换IP API
 TELEGRAM_API_URL="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage"
 LOG_FILE="change_ip.log" # 日志文件
 
+# 读取配置文件
+CONFIG_FILE="config.yaml"
+
+# 解析配置文件中的变量
+TELEGRAM_BOT_TOKEN=$(grep "^telegram_bot_token:" $CONFIG_FILE | cut -d'"' -f2)
+TELEGRAM_CHAT_ID=$(grep "^telegram_chat_id:" $CONFIG_FILE | cut -d'"' -f2)
+IP_CHANGE_API=$(grep "^ip_change_api:" $CONFIG_FILE | cut -d'"' -f2)
+LOG_FILE=$(grep "^log_file:" $CONFIG_FILE | cut -d'"' -f2)
+
+# 构建Telegram API URL
+TELEGRAM_API_URL="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage"
+
 # 获取当前时间 (格式: yyyy-MM-dd HH:mm:ss)
 current_timestamp() {
     echo "$(date +"%Y-%m-%d %H:%M:%S")"
