@@ -7,7 +7,9 @@
 
 `bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/refs/heads/main/install.sh)`
 
-### 手动配置定时任务
+验证：`crontab -l`
+
+### 手动配置
 
 #### 配置config.yaml
 
@@ -18,7 +20,7 @@
 - `ip_change_api`：IP更换API
 - `log_file`：日志文件路径
 
-### 配置定时任务
+#### 配置定时任务
 1. `chmod +x change_ip_*.sh`
 2. `crontab -e`
 3. 配置定时任务，按需配置一个或者多个
