@@ -1,6 +1,5 @@
-# 定时更改IP
-
 #!/bin/bash
+# 定时更改IP
 # change_ip_scheduled.sh
 
 # 引入通用功能模块

@@ -1,6 +1,5 @@
-# IP封锁检测
-
 #!/bin/bash
+# IP封锁检测
 # change_ip_check.sh
 # 引入通用功能模块
 source "$(dirname "$0")/change_ip_common.sh"

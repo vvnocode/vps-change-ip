@@ -1,6 +1,5 @@
-# 通用功能模块
-
 #!/bin/bash
+# 通用功能模块
 # change_ip_common.sh
 # 全局变量
 TELEGRAM_BOT_TOKEN=""          # 替换为你的Telegram Bot Token
