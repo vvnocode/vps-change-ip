@@ -11,6 +11,48 @@ echo "创建工作目录: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/logs"
 cd "$INSTALL_DIR"
 
+# 检查并安装yq
+install_yq() {
+    echo "检查yq是否已安装..."
+    if ! command -v yq &> /dev/null; then
+        echo "正在安装yq..."
+        if [ -f /etc/debian_version ]; then
+            # Debian/Ubuntu系统
+            if ! command -v snap &> /dev/null; then
+                apt-get update && apt-get install -y snapd
+                snap install core
+            fi
+            snap install yq
+        elif [ -f /etc/redhat-release ]; then
+            # CentOS/RHEL系统
+            if ! command -v wget &> /dev/null; then
+                yum install -y wget
+            fi
+            YQ_VERSION="v4.40.5"  # 使用最新的稳定版本
+            wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq && \
+            chmod +x /usr/local/bin/yq
+        elif [ -f /etc/alpine-release ]; then
+            # Alpine系统
+            apk add --no-cache yq
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS系统
+            brew install yq
+        else
+            echo "无法确定系统类型，请手动安装yq"
+            exit 1
+        fi
+        
+        if [ $? -eq 0 ]; then
+            echo "yq安装成功"
+        else
+            echo "yq安装失败，请手动安装"
+            exit 1
+        fi
+    else
+        echo "yq已安装"
+    fi
+}
+
 # 下载文件函数
 download_file() {
     local url=$1
@@ -41,6 +83,7 @@ download_file() {
 }
 
 # 下载所需文件
+install_yq
 echo "正在下载必要文件..."
 FILES_TO_DOWNLOAD=(
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_common.sh"

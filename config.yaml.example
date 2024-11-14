@@ -11,6 +11,7 @@ ip_check_retry_times: "3"
 # Telegram配置
 telegram_bot_token: ""
 telegram_chat_id: ""
+last_update_id: 
 
 # IP更换配置
 ip_change_api: ""
