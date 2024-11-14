@@ -183,7 +183,9 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=$INSTALL_DIR/change_ip_telegram.sh
+User=root
+WorkingDirectory=$INSTALL_DIR/vps-change-ip
+ExecStart=/bin/bash $INSTALL_DIR/vps-change-ip/change_ip_telegram.sh
 Restart=always
 RestartSec=10
 
