@@ -85,14 +85,12 @@ FILES_TO_DOWNLOAD=(
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_common.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_check.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_scheduled.sh"
-    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_telegram.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/config.yaml.example"
 )
 FILES_OUTPUT=(
     "change_ip_common.sh"
     "change_ip_check.sh"
     "change_ip_scheduled.sh"
-    "change_ip_telegram.sh"
     "config.yaml.example"
 )
 
@@ -119,36 +117,8 @@ chmod +x change_ip_*.sh
 echo -e "\n=== 配置信息 ==="
 read -p "是否要更新配置信息？(y/N): " update_config
 if [[ "$update_config" =~ ^[Yy]$ ]]; then
-    read -p "是否启用 Telegram Bot？(y/N): " enable_telegram
-    if [[ "$enable_telegram" =~ ^[Yy]$ ]]; then
-        read -p "请输入Telegram Bot Token: " telegram_bot_token
-        read -p "请输入Telegram Chat ID: " telegram_chat_id
-        
-        # 验证 Telegram 配置不为空
-        if [ -z "$telegram_bot_token" ] || [ -z "$telegram_chat_id" ]; then
-            echo "错误：Telegram 配置信息不能为空"
-            exit 1
-        fi
-        
-        # 更新 Telegram 配置
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|^telegram_bot_token: .*|telegram_bot_token: \"$telegram_bot_token\"|" config.yaml
-            sed -i '' "s|^telegram_chat_id: .*|telegram_chat_id: \"$telegram_chat_id\"|" config.yaml
-            sed -i '' "s|^enable_telegram: .*|enable_telegram: true|" config.yaml
-        else
-            sed -i "s|^telegram_bot_token: .*|telegram_bot_token: \"$telegram_bot_token\"|" config.yaml
-            sed -i "s|^telegram_chat_id: .*|telegram_chat_id: \"$telegram_chat_id\"|" config.yaml
-            sed -i "s|^enable_telegram: .*|enable_telegram: true|" config.yaml
-        fi
-    else
-        # 禁用 Telegram
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|^enable_telegram: .*|enable_telegram: false|" config.yaml
-        else
-            sed -i "s|^enable_telegram: .*|enable_telegram: false|" config.yaml
-        fi
-    fi
-    
+    read -p "请输入Telegram Bot Token: " telegram_bot_token
+    read -p "请输入Telegram Chat ID: " telegram_chat_id
     read -p "请输入IP更换API地址: " ip_change_api
 
     # 验证输入不为空
@@ -229,62 +199,6 @@ setup_crontab() {
     crontab -l | grep "change_ip" | sort | uniq
 }
 
-# 在 setup_crontab 函数后添加
-setup_telegram_bot() {
-    # 检查是否启用 Telegram Bot
-    ENABLE_TELEGRAM=$(yq eval '.enable_telegram' config.yaml)
-    
-    if [ "$ENABLE_TELEGRAM" = "true" ]; then
-        echo "配置 Telegram Bot 服务..."
-        
-        # 如果服务存在，先删除旧服务
-        if [ -f "/etc/systemd/system/vps-change-ip-bot.service" ]; then
-            echo "删除旧的 Telegram Bot 服务..."
-            systemctl stop vps-change-ip-bot
-            systemctl disable vps-change-ip-bot
-            rm -f /etc/systemd/system/vps-change-ip-bot.service
-            systemctl daemon-reload
-        fi
-        
-        # 创建新的系统服务文件
-        cat > /etc/systemd/system/vps-change-ip-bot.service << EOF
-[Unit]
-Description=VPS Change IP Telegram Bot
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$INSTALL_DIR
-ExecStart=/bin/bash $INSTALL_DIR/change_ip_telegram.sh
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-        # 重新加载系统服务
-        systemctl daemon-reload
-        
-        # 启用并启动服务
-        systemctl enable vps-change-ip-bot
-        systemctl start vps-change-ip-bot
-        
-        echo "Telegram Bot 服务已创建并启动"
-    else
-        echo "Telegram Bot 未启用，跳过服务配置"
-        # 如果服务存在则停止并移除
-        if [ -f "/etc/systemd/system/vps-change-ip-bot.service" ]; then
-            echo "停止并移除现有的 Telegram Bot 服务..."
-            systemctl stop vps-change-ip-bot
-            systemctl disable vps-change-ip-bot
-            rm -f /etc/systemd/system/vps-change-ip-bot.service
-            systemctl daemon-reload
-        fi
-    fi
-}
-
 # 安装完成提示
 finish_install() {
     # 读取配置文件中的定时任务设置
@@ -299,7 +213,6 @@ finish_install() {
 
 # 调用函数
 setup_crontab
-setup_telegram_bot
 finish_install
 
 # 验证安装
