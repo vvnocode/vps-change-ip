@@ -127,6 +127,10 @@ setup_crontab() {
     echo -e "\n=== 验证安装 ==="
     echo "配置定时任务..."
     
+    # 读取配置文件中的定时任务设置
+    CRON_CHECK_SCHEDULE=$(grep "^cron_check_schedule:" config.yaml | cut -d'"' -f2)
+    CRON_CHANGE_SCHEDULE=$(grep "^cron_change_schedule:" config.yaml | cut -d'"' -f2)
+    
     # 创建临时文件
     TEMP_CRON=$(mktemp)
     
@@ -142,8 +146,8 @@ setup_crontab() {
     
     # 添加新的定时任务（只添加一次）
     {
-        echo "*/30 * * * * $INSTALL_DIR/change_ip_check.sh"
-        echo "0 6 * * * $INSTALL_DIR/change_ip_scheduled.sh"
+        echo "$CRON_CHECK_SCHEDULE $INSTALL_DIR/change_ip_check.sh"
+        echo "$CRON_CHANGE_SCHEDULE $INSTALL_DIR/change_ip_scheduled.sh"
     } >> "$TEMP_CRON"
     
     # 应用新的crontab配置
@@ -153,16 +157,19 @@ setup_crontab() {
     rm -f "$TEMP_CRON"
     
     echo "验证定时任务..."
-    # 只显示一次验证结果
     crontab -l | grep "change_ip" | sort | uniq
 }
 
 # 安装完成提示
 finish_install() {
+    # 读取配置文件中的定时任务设置
+    CRON_CHECK_SCHEDULE=$(grep "^cron_check_schedule:" config.yaml | cut -d'"' -f2)
+    CRON_CHANGE_SCHEDULE=$(grep "^cron_change_schedule:" config.yaml | cut -d'"' -f2)
+    
     echo -e "\n=== 安装完成！ ==="
     echo "定时任务已配置："
-    echo "- 每30分钟检查一次IP状态"
-    echo "- 每天6:00自动更换IP"
+    echo "- IP状态检查：$CRON_CHECK_SCHEDULE"
+    echo "- 自动更换IP：$CRON_CHANGE_SCHEDULE"
 }
 
 # 调用函数
