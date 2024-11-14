@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 引入通用功能模块
-source "$(dirname "$0")/change_ip_common.sh"
+source change_ip_common.sh
 
 # 从JSON响应中提取字段
 parse_json() {
@@ -13,6 +13,7 @@ parse_json() {
 # 获取更新
 get_updates() {
     local offset=$1
+    echo "telegram_bot_token: $TELEGRAM_BOT_TOKEN"
     local response=$(curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getUpdates?offset=$offset&timeout=60")
     # 添加调试日志
     echo "$(date): 获取更新响应: $response" >> logs/telegram_debug.log
@@ -28,14 +29,15 @@ process_message() {
     
     # 提取chat_id和消息文本
     local chat_id=$(echo "$update" | grep -o '"chat":{"id":[0-9]*' | grep -o '[0-9]*')
+    local from_id=$(echo "$update" | grep -o '"from":{"id":[0-9]*' | grep -o '[0-9]*')
     local text=$(parse_json "$update" "text")
     local update_id=$(echo "$update" | grep -o '"update_id":[0-9]*' | grep -o '[0-9]*')
 
     # 记录提取的信息
-    echo "Chat ID: $chat_id, Text: $text" >> logs/telegram_bot.log
+    echo "Chat ID: $chat_id, From ID: $from_id, Text: $text" >> logs/telegram_bot.log
 
-    # 只处理指定chat_id的消息
-    if [ "$chat_id" = "$TELEGRAM_CHAT_ID" ]; then
+    # 只处理指定from_id的消息
+    if [ "$from_id" = "$TELEGRAM_CHAT_ID" ]; then
         case "$text" in
             "/changeip"|"换IP")
                 echo "执行换IP命令" >> logs/telegram_bot.log
@@ -54,9 +56,9 @@ process_message() {
                 fi
                 ;;
         esac
+    else
+        echo "无效的发送者ID: $from_id" >> logs/telegram_bot.log
     fi
-    
-    echo "$update_id"
 }
 
 # 主循环
