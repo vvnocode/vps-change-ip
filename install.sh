@@ -18,11 +18,7 @@ install_yq() {
         echo "正在安装yq..."
         if [ -f /etc/debian_version ]; then
             # Debian/Ubuntu系统
-            if ! command -v snap &> /dev/null; then
-                apt-get update && apt-get install -y snapd
-                snap install core
-            fi
-            snap install yq
+            apt-get update && apt-get install -y yq
         elif [ -f /etc/redhat-release ]; then
             # CentOS/RHEL系统
             if ! command -v wget &> /dev/null; then
