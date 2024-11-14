@@ -1,3 +1,4 @@
 config.yaml
 *.log
 test*
+vps-change-ip
