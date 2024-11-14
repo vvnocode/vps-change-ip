@@ -46,12 +46,14 @@ FILES_TO_DOWNLOAD=(
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_common.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_check.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_scheduled.sh"
+    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_telegram.sh"
     "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/config.yaml.example"
 )
 FILES_OUTPUT=(
     "change_ip_common.sh"
     "change_ip_check.sh"
     "change_ip_scheduled.sh"
+    "change_ip_telegram.sh"
     "config.yaml.example"
 )
 
@@ -160,6 +162,45 @@ setup_crontab() {
     crontab -l | grep "change_ip" | sort | uniq
 }
 
+# 在 setup_crontab 函数后添加
+setup_telegram_bot() {
+    echo "配置 Telegram Bot 服务..."
+    
+    # 如果服务存在，先删除旧服务
+    if [ -f "/etc/systemd/system/vps-change-ip-bot.service" ]; then
+        echo "删除旧的 Telegram Bot 服务..."
+        systemctl stop vps-change-ip-bot
+        systemctl disable vps-change-ip-bot
+        rm -f /etc/systemd/system/vps-change-ip-bot.service
+        systemctl daemon-reload
+    fi
+    
+    # 创建新的系统服务文件
+    cat > /etc/systemd/system/vps-change-ip-bot.service << EOF
+[Unit]
+Description=VPS Change IP Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=$INSTALL_DIR/change_ip_telegram.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # 重新加载系统服务
+    systemctl daemon-reload
+    
+    # 启用并启动服务
+    systemctl enable vps-change-ip-bot
+    systemctl start vps-change-ip-bot
+    
+    echo "Telegram Bot 服务已创建并启动"
+}
+
 # 安装完成提示
 finish_install() {
     # 读取配置文件中的定时任务设置
@@ -174,6 +215,7 @@ finish_install() {
 
 # 调用函数
 setup_crontab
+setup_telegram_bot
 finish_install
 
 # 验证安装

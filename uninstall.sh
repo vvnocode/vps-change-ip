@@ -16,6 +16,19 @@ remove_crontab() {
     echo "定时任务已删除"
 }
 
+# 删除Telegram Bot服务
+remove_telegram_bot() {
+    echo "正在删除Telegram Bot服务..."
+    # 停止并禁用服务
+    systemctl stop vps-change-ip-bot
+    systemctl disable vps-change-ip-bot
+    # 删除服务文件
+    rm -f /etc/systemd/system/vps-change-ip-bot.service
+    # 重新加载systemd
+    systemctl daemon-reload
+    echo "Telegram Bot服务已删除"
+}
+
 # 获取安装目录
 CURRENT_DIR=$(pwd)
 INSTALL_DIR="$CURRENT_DIR/vps-change-ip"
@@ -28,6 +41,9 @@ fi
 # 删除定时任务
 remove_crontab
 
+# 删除Telegram Bot服务
+remove_telegram_bot
+
 # 如果安装目录存在，询问是否删除
 if [ -d "$INSTALL_DIR" ]; then
     echo -e "\n是否保留配置文件？"
@@ -39,7 +55,7 @@ if [ -d "$INSTALL_DIR" ]; then
     case $keep_config in
         1)
             echo "保留所有文件..."
-            echo "仅删除了定时任务，您可以随时重新配置定时任务"
+            echo "仅删除了定时任务和Telegram Bot服务，您可以随时重新配置"
             ;;
         2)
             echo "删除所有文件..."
@@ -55,7 +71,7 @@ if [ -d "$INSTALL_DIR" ]; then
         echo "所有文件已保留在: $INSTALL_DIR"
     fi
 else
-    echo "未找到安装目录，仅删除了定时任务"
+    echo "未找到安装目录，仅删除了定时任务和Telegram Bot服务"
 fi
 
 echo -e "\n卸载完成！" 
