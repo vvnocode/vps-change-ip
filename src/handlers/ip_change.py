@@ -2,9 +2,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from utils.network import change_ip, get_current_ip
 from handlers.ip_quality import IPQualityChecker
-from config import load_config
+from config import config
 import time
-from datetime import datetime
 import os
 
 # 添加获取上次更换时间的函数
@@ -25,7 +24,6 @@ def update_last_change_time():
 
 async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """更换IP的命令处理器"""
-    config = load_config()
     
     # 验证用户权限
     if str(update.effective_user.id) != config['telegram_chat_id']:
@@ -33,7 +31,7 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     # 检查更换间隔
-    interval = config.get('ip_change_interval', 1) # 默认1分钟
+    interval = config.get('ip_change_interval', 2) # 默认1分钟
     last_change = get_last_change_time()
     current_time = time.time()
     time_diff = (current_time - last_change) / 60  # 转换为分钟
