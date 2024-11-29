@@ -1,17 +1,8 @@
-# 定时任务配置
-cron_check_schedule: "*/30 * * * *"
-cron_check_script: "/root/change_ip_check.sh"
-cron_change_schedule: "0 6 * * *"
-cron_change_script: "/root/change_ip_scheduled.sh"
-
-# IP 检测配置
-ip_check_interval: "30"
-ip_check_retry_times: "3"
-
 # Telegram配置
-telegram_bot_token: ""
-telegram_chat_id: ""
+telegram_bot_token: ""  # 你的Telegram Bot Token
+telegram_chat_id: ""    # 授权的Telegram用户ID
 
 # IP更换配置
-ip_change_api: ""
+ip_check_api: ""       # IP检查API地址
+ip_change_api: ""       # IP更换API地址
 log_file: "change_ip.log"

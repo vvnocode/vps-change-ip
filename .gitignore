@@ -2,3 +2,5 @@ config.yaml
 *.log
 test*
 vps-change-ip
+venv/
+__pycache__/
