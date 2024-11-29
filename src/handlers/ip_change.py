@@ -68,18 +68,13 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 # 检查IP质量
                 checker = IPQualityChecker(
-                    check_script=config.get('ip_check_script'),
-                    screenshot_path=config.get('ip_check_screenshot_path', '/tmp/ip_check.png')
+                    check_script=config.get('ip_check_script')
                 )
                 
-                success, screenshot_path, error_msg = checker.check()
+                success, error_msg = checker.check()
                 
                 if success:
-                    await update.message.reply_photo(
-                        photo=open(screenshot_path, 'rb'),
-                        caption="IP检查结果"
-                    )
-                    checker.cleanup()
+                    await update.message.reply_text("IP质量检查通过")
                 elif error_msg:
                     await update.message.reply_text(f"IP检查失败: {error_msg}")
             else:

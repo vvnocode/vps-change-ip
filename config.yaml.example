@@ -10,4 +10,3 @@ log_file: "change_ip.log"
 
 # IP检查配置
 ip_check_script: "curl -Ls IP.Check.Place | bash"
-ip_check_screenshot_path: "/tmp/ip_check.png"
