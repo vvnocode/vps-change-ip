@@ -5,6 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from config import config
 from handlers.ip_check import check_ip_status
 from handlers.ip_change import change_ip_handler
+from handlers.ip_quality import ip_quality_handler
 
 # 设置日志
 logging.basicConfig(
@@ -32,7 +33,8 @@ class VPSChangeIPBot:
         await update.message.reply_text(
             "欢迎使用VPS IP更换工具\n"
             "/check - 检查当前IP状态\n"
-            "/change - 手动更换IP"
+            "/change - 手动更换IP\n"
+            "/quality - 检查IP质量"
         )
 
     def run(self):
@@ -45,7 +47,7 @@ class VPSChangeIPBot:
         self.app.add_handler(CommandHandler("start", self.start))
         self.app.add_handler(CommandHandler("check", check_ip_status))
         self.app.add_handler(CommandHandler("change", change_ip_handler))
-        
+        self.app.add_handler(CommandHandler("quality", ip_quality_handler))
         # 启动机器人
         logger.info("机器人开始运行...")
         self.app.run_polling()

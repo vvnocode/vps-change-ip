@@ -1,10 +1,10 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from utils.network import change_ip, get_current_ip
-from handlers.ip_quality import IPQualityChecker
 from config import config
 import time
 import os
+from handlers.ip_quality import ip_quality_handler
 
 # 添加获取上次更换时间的函数
 def get_last_change_time() -> float:
@@ -65,16 +65,7 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 
                 # 检查IP质量
-                checker = IPQualityChecker(
-                    check_script=config.get('ip_check_script')
-                )
-                
-                success, error_msg = checker.check()
-                
-                if success:
-                    await update.message.reply_text("IP质量检查通过")
-                elif error_msg:
-                    await update.message.reply_text(f"IP检查失败: {error_msg}")
+                await ip_quality_handler(update, context)
             else:
                 await update.message.reply_text("IP更换可能未成功,新旧IP相同")
         else:
