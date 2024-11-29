@@ -4,220 +4,71 @@ echo "=== VPS IP更换工具安装 ==="
 
 # 获取当前绝对路径
 CURRENT_DIR=$(pwd)
-INSTALL_DIR="$CURRENT_DIR/vps-change-ip"
+INSTALL_DIR="/usr/local/vps-ip-bot"
+CONFIG_DIR="/etc/vps-ip-bot"
 
-# 创建工作目录
-echo "创建工作目录: $INSTALL_DIR"
-mkdir -p "$INSTALL_DIR/logs"
-cd "$INSTALL_DIR"
+# 创建必要目录
+echo "创建工作目录..."
+mkdir -p "$INSTALL_DIR"
+mkdir -p "$CONFIG_DIR"
+mkdir -p "$CONFIG_DIR/logs"
 
-# 检查并安装yq
-install_yq() {
-    echo "检查yq是否已安装..."
-    if ! command -v yq &> /dev/null; then
-        echo "正在安装yq..."
-        if [ -f /etc/debian_version ]; then
-            # Debian/Ubuntu系统
-            apt-get update && apt-get install -y yq
-        elif [ -f /etc/redhat-release ]; then
-            # CentOS/RHEL系统
-            if ! command -v wget &> /dev/null; then
-                yum install -y wget
-            fi
-            YQ_VERSION="v4.40.5"  # 使用最新的稳定版本
-            wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq && \
-            chmod +x /usr/local/bin/yq
-        elif [ -f /etc/alpine-release ]; then
-            # Alpine系统
-            apk add --no-cache yq
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS系统
-            brew install yq
-        else
-            echo "无法确定系统类型，请手动安装yq"
-            exit 1
-        fi
-        
-        if [ $? -eq 0 ]; then
-            echo "yq安装成功"
-        else
-            echo "yq安装失败，请手动安装"
-            exit 1
-        fi
-    else
-        echo "yq已安装"
-    fi
-}
+# 下载二进制文件
+echo "下载程序文件..."
+BINARY_URL="https://github.com/your-repo/releases/latest/download/vps-ip-bot"
+curl -L -o "$INSTALL_DIR/vps-ip-bot" "$BINARY_URL"
+chmod +x "$INSTALL_DIR/vps-ip-bot"
 
-# 下载文件函数
-download_file() {
-    local url=$1
-    local output=$2
-    local max_retries=3
-    local retry_count=0
-
-    while [ $retry_count -lt $max_retries ]; do
-        echo "正在下载 $output (尝试 $((retry_count + 1))/$max_retries)..."
-        
-        # 使用 -f 选项强制下载，-L 跟随重定向，增加超时设置
-        if curl -f -L -s --connect-timeout 10 --max-time 30 "$url" -o "$output"; then
-            if [ -f "$output" ]; then
-                echo "下载 $output 成功"
-                return 0
-            fi
-        fi
-        
-        retry_count=$((retry_count + 1))
-        if [ $retry_count -lt $max_retries ]; then
-            echo "下载失败，等待 3 秒后重试..."
-            sleep 3
-        fi
-    done
-
-    echo "下载 $output 失败（已重试 $max_retries 次）"
-    return 1
-}
-
-# 下载所需文件
-install_yq
-echo "正在下载必要文件..."
-FILES_TO_DOWNLOAD=(
-    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_common.sh"
-    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_check.sh"
-    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/change_ip_scheduled.sh"
-    "https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/config.yaml.example"
-)
-FILES_OUTPUT=(
-    "change_ip_common.sh"
-    "change_ip_check.sh"
-    "change_ip_scheduled.sh"
-    "config.yaml.example"
-)
-
-for i in "${!FILES_TO_DOWNLOAD[@]}"; do
-    if ! download_file "${FILES_TO_DOWNLOAD[$i]}" "${FILES_OUTPUT[$i]}"; then
-        echo "错误：无法下载必要文件，安装终止"
-        echo "请检查网络连接或访问 https://github.com/vvnocode/vps-change-ip 手动下载文件"
-        exit 1
-    fi
-done
+# 下载配置文件模板
+echo "下载配置文件..."
+CONFIG_URL="https://raw.githubusercontent.com/your-repo/main/config.yaml.example" 
+curl -L -o "$CONFIG_DIR/config.yaml.example" "$CONFIG_URL"
 
 # 处理配置文件
-if [ ! -f "config.yaml" ]; then
-    echo "未检测到现有配置文件，将使用示例配置..."
-    cp config.yaml.example config.yaml
-else
-    echo "检测到现有配置文件，将保留现有配置..."
+if [ ! -f "$CONFIG_DIR/config.yaml" ]; then
+    cp "$CONFIG_DIR/config.yaml.example" "$CONFIG_DIR/config.yaml"
 fi
 
-# 设置脚本执行权限
-chmod +x change_ip_*.sh
+# 创建systemd服务
+cat > /etc/systemd/system/vps-ip-bot.service << EOF
+[Unit]
+Description=VPS IP Change Bot
+After=network.target
 
-# 交互式配置
+[Service]
+Type=simple
+ExecStart=$INSTALL_DIR/vps-ip-bot
+WorkingDirectory=$CONFIG_DIR
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 重载systemd
+systemctl daemon-reload
+
+# 配置向导
 echo -e "\n=== 配置信息 ==="
-read -p "是否要更新配置信息？(y/N): " update_config
-if [[ "$update_config" =~ ^[Yy]$ ]]; then
-    read -p "请输入Telegram Bot Token: " telegram_bot_token
-    read -p "请输入Telegram Chat ID: " telegram_chat_id
-    read -p "请输入IP更换API地址: " ip_change_api
-
-    # 验证输入不为空
-    if [ -z "$telegram_bot_token" ] || [ -z "$telegram_chat_id" ] || [ -z "$ip_change_api" ]; then
-        echo "错误：配置信息不能为空"
-        exit 1
-    fi
-
+read -p "是否现在配置Bot? (y/N): " configure_now
+if [[ "$configure_now" =~ ^[Yy]$ ]]; then
+    read -p "请输入Telegram Bot Token: " bot_token
+    read -p "请输入Telegram Chat ID: " chat_id
+    read -p "请输入IP更换API地址: " ip_api
+    
     # 更新配置文件
-    echo "更新配置文件..."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        sed -i '' "s|^telegram_bot_token: .*|telegram_bot_token: \"$telegram_bot_token\"|" config.yaml
-        sed -i '' "s|^telegram_chat_id: .*|telegram_chat_id: \"$telegram_chat_id\"|" config.yaml
-        sed -i '' "s|^ip_change_api: .*|ip_change_api: \"$ip_change_api\"|" config.yaml
-    else
-        # Linux
-        sed -i "s|^telegram_bot_token: .*|telegram_bot_token: \"$telegram_bot_token\"|" config.yaml
-        sed -i "s|^telegram_chat_id: .*|telegram_chat_id: \"$telegram_chat_id\"|" config.yaml
-        sed -i "s|^ip_change_api: .*|ip_change_api: \"$ip_change_api\"|" config.yaml
-    fi
-
-    # 验证配置文件更新
-    if ! grep -q "$telegram_bot_token" config.yaml || ! grep -q "$telegram_chat_id" config.yaml || ! grep -q "$ip_change_api" config.yaml; then
-        echo "错误：配置文件更新失败"
-        exit 1
-    fi
+    sed -i "s|^telegram_bot_token:.*|telegram_bot_token: \"$bot_token\"|" "$CONFIG_DIR/config.yaml"
+    sed -i "s|^telegram_chat_id:.*|telegram_chat_id: \"$chat_id\"|" "$CONFIG_DIR/config.yaml"
+    sed -i "s|^ip_change_api:.*|ip_change_api: \"$ip_api\"|" "$CONFIG_DIR/config.yaml"
 fi
 
-# 仅更新路径相关的配置
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    sed -i '' "s|^cron_check_script: .*|cron_check_script: \"$INSTALL_DIR/change_ip_check.sh\"|" config.yaml
-    sed -i '' "s|^cron_change_script: .*|cron_change_script: \"$INSTALL_DIR/change_ip_scheduled.sh\"|" config.yaml
-    sed -i '' "s|^log_file: .*|log_file: \"$INSTALL_DIR/logs/change_ip.log\"|" config.yaml
-else
-    # Linux
-    sed -i "s|^cron_check_script: .*|cron_check_script: \"$INSTALL_DIR/change_ip_check.sh\"|" config.yaml
-    sed -i "s|^cron_change_script: .*|cron_change_script: \"$INSTALL_DIR/change_ip_scheduled.sh\"|" config.yaml
-    sed -i "s|^log_file: .*|log_file: \"$INSTALL_DIR/logs/change_ip.log\"|" config.yaml
-fi
+# 启动服务
+echo "启动服务..."
+systemctl enable vps-ip-bot
+systemctl start vps-ip-bot
 
-# 配置定时任务
-setup_crontab() {
-    echo -e "\n=== 验证安装 ==="
-    echo "配置定时任务..."
-    
-    # 读取配置文件中的定时任务设置
-    CRON_CHECK_SCHEDULE=$(grep "^cron_check_schedule:" config.yaml | cut -d'"' -f2)
-    CRON_CHANGE_SCHEDULE=$(grep "^cron_change_schedule:" config.yaml | cut -d'"' -f2)
-    
-    # 创建临时文件
-    TEMP_CRON=$(mktemp)
-    
-    # 保存非change_ip的现有定时任务
-    if crontab -l >/dev/null 2>&1; then
-        crontab -l | grep -v "change_ip" > "$TEMP_CRON"
-    else
-        touch "$TEMP_CRON"
-    fi
-    
-    # 确保文件以换行符结尾
-    [ -s "$TEMP_CRON" ] && echo "" >> "$TEMP_CRON"
-    
-    # 添加新的定时任务（只添加一次）
-    {
-        echo "$CRON_CHECK_SCHEDULE $INSTALL_DIR/change_ip_check.sh"
-        echo "$CRON_CHANGE_SCHEDULE $INSTALL_DIR/change_ip_scheduled.sh"
-    } >> "$TEMP_CRON"
-    
-    # 应用新的crontab配置
-    crontab "$TEMP_CRON"
-    
-    # 清理临时文件
-    rm -f "$TEMP_CRON"
-    
-    echo "验证定时任务..."
-    crontab -l | grep "change_ip" | sort | uniq
-}
-
-# 安装完成提示
-finish_install() {
-    # 读取配置文件中的定时任务设置
-    CRON_CHECK_SCHEDULE=$(grep "^cron_check_schedule:" config.yaml | cut -d'"' -f2)
-    CRON_CHANGE_SCHEDULE=$(grep "^cron_change_schedule:" config.yaml | cut -d'"' -f2)
-    
-    echo -e "\n=== 安装完成！ ==="
-    echo "定时任务已配置："
-    echo "- IP状态检查：$CRON_CHECK_SCHEDULE"
-    echo "- 自动更换IP：$CRON_CHANGE_SCHEDULE"
-}
-
-# 调用函数
-setup_crontab
-finish_install
-
-# 验证安装
-echo -e "\n=== 安装完成！ ==="
-echo "安装目录: $INSTALL_DIR"
-echo "配置文件: $INSTALL_DIR/config.yaml"
-echo "定时任务已配置完成，可以通过 crontab -l 查看"
-echo "您可以通过编辑 config.yaml 文件修改配置" 
+echo -e "\n=== 安装完成! ==="
+echo "配置文件位置: $CONFIG_DIR/config.yaml"
+echo "日志文件位置: $CONFIG_DIR/logs/bot.log"
+echo "使用以下命令管理服务:"
+echo "systemctl start/stop/restart vps-ip-bot" 

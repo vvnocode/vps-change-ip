@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 def load_config() -> Dict[str, Any]:
     """加载配置文件"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.yaml")
+    config_path = "/etc/vps-ip-bot/config.yaml"
     
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"配置文件不存在: {config_path}")
