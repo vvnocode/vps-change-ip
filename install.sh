@@ -56,6 +56,18 @@ uninstall() {
 install() {
     echo -e "${GREEN}=== VPS IP更换工具安装 ===${NC}"
     
+    # 安装系统依赖
+    echo "安装系统依赖..."
+    if command -v apt-get >/dev/null 2>&1; then
+        apt-get update
+        apt-get install -y xvfb x11-utils xauth
+    elif command -v yum >/dev/null 2>&1; then
+        yum install -y xorg-x11-server-Xvfb xorg-x11-utils xorg-x11-xauth
+    else
+        echo -e "${RED}不支持的系统包管理器${NC}"
+        exit 1
+    fi
+    
     # 创建必要目录
     echo "创建工作目录..."
     mkdir -p "$INSTALL_DIR"
