@@ -6,3 +6,7 @@ telegram_chat_id: ""    # 授权的Telegram用户ID
 ip_check_api: ""       # IP检查API地址
 ip_change_api: ""       # IP更换API地址
 log_file: "change_ip.log"
+
+# IP检查配置
+ip_check_script: "curl -Ls IP.Check.Place | bash"
+ip_check_screenshot_path: "/tmp/ip_check.png"

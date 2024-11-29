@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from utils.network import change_ip, get_current_ip
+from handlers.ip_quality import IPQualityChecker
 from config import load_config
 
 async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -28,6 +29,23 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"旧IP: {old_ip}\n"
                     f"新IP: {new_ip}"
                 )
+                
+                # 检查IP质量
+                checker = IPQualityChecker(
+                    check_script=config.get('ip_check_script'),
+                    screenshot_path=config.get('ip_check_screenshot_path', '/tmp/ip_check.png')
+                )
+                
+                success, screenshot_path, error_msg = checker.check()
+                
+                if success:
+                    await update.message.reply_photo(
+                        photo=open(screenshot_path, 'rb'),
+                        caption="IP检查结果"
+                    )
+                    checker.cleanup()
+                elif error_msg:
+                    await update.message.reply_text(f"IP检查失败: {error_msg}")
             else:
                 await update.message.reply_text("IP更换可能未成功,新旧IP相同")
         else:
