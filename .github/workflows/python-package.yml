@@ -1,0 +1,36 @@
+name: Build Release
+
+on:
+  push:
+    tags: [ '**' ]
+
+jobs:
+  build:
+    name: Build Linux Amd64
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        # 必须加''
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pyinstaller
+        
+    - name: Build binary
+      run: bash build.sh
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          vps-ip-bot
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
