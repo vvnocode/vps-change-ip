@@ -15,7 +15,6 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        # 必须加''
         python-version: '3.10'
         
     - name: Install dependencies
@@ -25,12 +24,23 @@ jobs:
         pip install pyinstaller
         
     - name: Build binary
-      run: bash build.sh
+      run: |
+        # 确保build.sh可执行
+        chmod +x build.sh
+        # 运行构建脚本
+        ./build.sh
+        
+    - name: Check binary
+      run: |
+        if [ ! -f "vps-ip-bot" ]; then
+          echo "Binary not found!"
+          exit 1
+        fi
         
     - name: Create Release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: |
-          vps-ip-bot
+        files: vps-ip-bot
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
