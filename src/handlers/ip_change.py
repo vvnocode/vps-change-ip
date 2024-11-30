@@ -4,7 +4,6 @@ from utils.network import change_ip, get_current_ip
 from config import config
 import time
 import os
-from handlers.ip_quality import ip_quality_handler
 from handlers.user_check import check_user_permission
 
 # 添加获取上次更换时间的函数
