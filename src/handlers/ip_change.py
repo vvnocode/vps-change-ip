@@ -50,22 +50,26 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         old_ip = get_current_ip()
         
         # 调用API更换IP
-        if change_ip(config['ip_change_api']):
+        new_ip = change_ip(config['ip_change_api'])
+        if new_ip:
             # 更新最后更换时间
             update_last_change_time()
-            
-            # 等待IP更换完成
-            new_ip = get_current_ip()
-            
-            if old_ip != new_ip:
+
+            if new_ip == "OK":
+                await update.message.reply_text(
+                    f"IP更换执行完成，需要手动检查IP是否更换成功!"
+                )
+            elif old_ip != new_ip:
                 await update.message.reply_text(
                     f"IP更换成功!\n"
                     f"旧IP: {old_ip}\n"
                     f"新IP: {new_ip}"
                 )
-                
-                # 检查IP质量
-                await ip_quality_handler(update, context)
+                # 等待5秒
+                time.sleep(5)
+                # 如果IP更换成功，检查IP质量
+                if get_current_ip() == new_ip:
+                    await ip_quality_handler(update, context)
             else:
                 await update.message.reply_text("IP更换可能未成功,新旧IP相同")
         else:

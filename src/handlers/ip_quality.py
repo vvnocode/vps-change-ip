@@ -90,14 +90,14 @@ def parse_ip_check_result(output_lines):
                 statuses = line.split()[1:]
                 for i, status in enumerate(statuses):
                     service_status[i] = status
-            elif '地区：' in line:
-                regions = line.split()[1:]
-                for i, region in enumerate(regions):
-                    service_region[i] = region if region else ''
-            elif '方式：' in line:
-                methods = line.split()[1:]
-                for i, method in enumerate(methods):
-                    service_method[i] = method if method else ''
+            # elif '地区：' in line:
+            #     regions = line.split()[1:]
+            #     for i, region in enumerate(regions):
+            #         service_region[i] = region if region else ''
+            # elif '方式：' in line:
+            #     methods = line.split()[1:]
+            #     for i, method in enumerate(methods):
+            #         service_method[i] = method if method else ''
             elif '服务商：' in line:
                 services = line.split()[1:]
                 for i, service in enumerate(services):

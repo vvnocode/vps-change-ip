@@ -39,8 +39,9 @@ def check_ip_blocked() -> Tuple[bool, str]:
 def change_ip(api_url: str) -> bool:
     """更换IP地址"""
     try:
-        response = requests.get(api_url, timeout=30)
-        return response.status_code == 200
+        response = requests.get(api_url, timeout=300)
+        if response.status_code == 200:
+            return response.content.strip() or "OK"
     except Exception as e:
         logger.error(f"更换IP失败: {str(e)}")
-        raise 
+        return None 
