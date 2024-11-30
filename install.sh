@@ -56,12 +56,16 @@ uninstall() {
 install() {
     echo -e "${GREEN}=== VPS IP更换工具安装 ===${NC}"
     
-    # 创建必要目录
+    # 如果服务正在运行，先停止它
+    if systemctl is-active --quiet vps-ip-bot; then
+        echo "停止现有服务..."
+        systemctl stop vps-ip-bot
+    fi
+    
     echo "创建工作目录..."
     mkdir -p "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR/logs"
     
-    # 下载二进制文件
     echo "下载程序文件..."
     if ! curl -L -o "$INSTALL_DIR/vps-ip-bot" "$BINARY_URL"; then
         echo -e "${RED}下载程序文件失败${NC}"
