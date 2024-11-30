@@ -17,7 +17,7 @@
 
 ### 使用install.sh安装(推荐)
 ```bash
-bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/refs/heads/main/install.sh)
+bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/install.sh)
 ```
 
 ### 配置文件
