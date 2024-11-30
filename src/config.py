@@ -19,7 +19,7 @@ def load_config() -> Dict[str, Any]:
     else:
         raise FileNotFoundError(f"未找到配置文件。请确保以下路径之一存在配置文件: {', '.join(config_paths)}")
         
-    required_fields = ['telegram_bot_token', 'telegram_chat_id', 'ip_change_api']
+    required_fields = ['telegram_bot_token', 'telegram_chat_id']
     for field in required_fields:
         if not config.get(field):
             raise ValueError(f"配置文件缺少必要字段: {field}")

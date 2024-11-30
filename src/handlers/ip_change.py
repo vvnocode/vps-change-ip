@@ -32,6 +32,14 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     user_id = update.effective_user.id
     logger.info(f"收到 change 命令，用户ID: {user_id}")
+
+    # 检查是否配置了 ip_change_api
+    if not config.get('ip_change_api'):
+        await update.message.reply_text(
+            "未配置 IP 更换 API，无法使用更换 IP 功能\n"
+            "请在配置文件中设置 ip_change_api"
+        )
+        return
     
     # 检查更换间隔
     interval = config.get('ip_change_interval', 2) # 默认1分钟
