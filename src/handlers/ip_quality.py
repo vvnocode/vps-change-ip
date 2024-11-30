@@ -2,6 +2,7 @@ import subprocess
 import re
 from telegram import Update
 from telegram.ext import ContextTypes
+from handlers.user_check import check_user_permission
 
 command = "curl -Ls IP.Check.Place | bash"
 
@@ -54,8 +55,8 @@ def parse_ip_check_result(output_lines):
     
     streaming_data = False
     service_status = {}
-    service_region = {}
-    service_method = {}
+    regions_queue = []  # 使用列表作为队列存储地区
+    methods_queue = []  # 使用列表作为队列存储方式
     
     for line in output_lines:
         # 提取IP地址
@@ -90,35 +91,32 @@ def parse_ip_check_result(output_lines):
                 statuses = line.split()[1:]
                 for i, status in enumerate(statuses):
                     service_status[i] = status
-            # elif '地区：' in line:
-            #     regions = line.split()[1:]
-            #     for i, region in enumerate(regions):
-            #         service_region[i] = region if region else ''
-            # elif '方式：' in line:
-            #     methods = line.split()[1:]
-            #     for i, method in enumerate(methods):
-            #         service_method[i] = method if method else ''
+            elif '地区：' in line:
+                regions = line.split()[1:]
+                regions_queue = [r for r in regions if r.strip()]  # 存储非空地区
+            elif '方式：' in line:
+                methods = line.split()[1:]
+                methods_queue = [m for m in methods if m.strip()]  # 存储非空方式
             elif '服务商：' in line:
                 services = line.split()[1:]
                 for i, service in enumerate(services):
-                    result['streaming'][service] = {
-                        'status': '',
-                        'region': '',
-                        'method': ''
-                    }
+                    result['streaming'][service] = ''
     
-    # 合并服务信息
+    # 修改合并服务信息的逻辑
     for service_name in result['streaming'].keys():
         idx = list(result['streaming'].keys()).index(service_name)
         status = service_status.get(idx, '')
-        region = service_region.get(idx, '')
-        method = service_method.get(idx, '')
         
-        service_info = status
-        if region and region != '':
-            service_info += f"-{region}"
-        if method and method != '':
-            service_info += f"-{method}"
+        if status in ['失败', '屏蔽']:
+            service_info = status
+        else:
+            service_info = status
+            # 如果有可用的地区，取出第一个
+            if regions_queue:
+                service_info += f"-{regions_queue.pop(0)}"
+            # 如果有可用的方式，取出第一个
+            if methods_queue:
+                service_info += f"-{methods_queue.pop(0)}"
             
         result['streaming'][service_name] = service_info
     
@@ -143,12 +141,18 @@ def format_telegram_message(parsed_data):
     
     return message.strip()
 
-def get_telegram_send_message():
+async def get_telegram_send_message():
     output_lines = run_command_and_collect_data(command)
     parsed_data = parse_ip_check_result(output_lines)
     return format_telegram_message(parsed_data)
 
 async def ip_quality_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """检查IP质量的命令处理器"""
-    message = get_telegram_send_message()
+    # 验证用户权限
+    if not await check_user_permission(update):
+        return
+    
+    await update.message.reply_text("正在检测IP质量...")
+
+    message = await get_telegram_send_message()
     await update.message.reply_text(message)

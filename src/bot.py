@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import logging
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler
 from config import config
 from handlers.ip_check import check_ip_status
 from handlers.ip_change import change_ip_handler
 from handlers.ip_quality import ip_quality_handler
-
+from handlers.user_check import check_user_permission
 # 设置日志
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -23,6 +23,11 @@ class VPSChangeIPBot:
         
     async def start(self, update: Update, context):
         """处理/start命令"""
+
+        # 验证用户权限
+        if not await check_user_permission(update):
+            return
+        
         logger.info(f"收到 start 命令，用户ID: {update.effective_user.id}")
         user_id = update.effective_user.id
         if str(user_id) != self.config["telegram_chat_id"]:

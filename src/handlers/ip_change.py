@@ -5,6 +5,7 @@ from config import config
 import time
 import os
 from handlers.ip_quality import ip_quality_handler
+from handlers.user_check import check_user_permission
 
 # 添加获取上次更换时间的函数
 def get_last_change_time() -> float:
@@ -26,8 +27,7 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """更换IP的命令处理器"""
     
     # 验证用户权限
-    if str(update.effective_user.id) != config['telegram_chat_id']:
-        await update.message.reply_text("未授权的用户")
+    if not await check_user_permission(update):
         return
     
     # 检查更换间隔

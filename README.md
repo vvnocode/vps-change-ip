@@ -15,6 +15,11 @@
 
 ## 使用
 
+### 前置操作
+
+- 获取Telegram Bot Token和Chat ID
+- 一定要在服务器上运行一次`bash <(curl -Ls IP.Check.Place)`，因为该脚本需要手动输入y才能继续
+
 ### 使用install.sh安装(推荐)
 ```bash
 bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/install.sh)

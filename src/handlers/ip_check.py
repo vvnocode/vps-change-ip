@@ -1,15 +1,12 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from utils.network import check_ip_blocked
-from config import load_config
-
+from handlers.user_check import check_user_permission
 async def check_ip_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """检查IP状态的命令处理器"""
-    config = load_config()
     
     # 验证用户权限
-    if str(update.effective_user.id) != config['telegram_chat_id']:
-        await update.message.reply_text("未授权的用户")
+    if not await check_user_permission(update):
         return
         
     await update.message.reply_text("正在检查IP状态...")
