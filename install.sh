@@ -106,7 +106,7 @@ EOF
     read -p "是否现在配置Bot? (y/N): " configure_now
     if [[ "$configure_now" =~ ^[Yy]$ ]]; then
         read -p "请输入Telegram Bot Token: " bot_token
-        read -p "请输入Telegram Chat ID: " chat_id
+        read -p "请输入Telegram Chat ID, 多个用户ID用逗号分隔: " chat_id
         read -p "请输入IP更换API地址: " ip_api
         
         # 更新配置文件

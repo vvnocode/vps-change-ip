@@ -3,7 +3,7 @@ import re
 from telegram import Update
 from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
-
+from utils.logger import logger
 command = "curl -Ls IP.Check.Place | bash"
 
 def clean_ansi_codes(text):
@@ -152,7 +152,10 @@ async def ip_quality_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not await check_user_permission(update):
         return
     
-    await update.message.reply_text("正在检测IP质量，请勿重复发送命令...")
+    user_id = update.effective_user.id
+    logger.info(f"收到 quality 命令，用户ID: {user_id}")
+    
+    await update.message.reply_text("正在检测IP质量...")
 
     message = await get_telegram_send_message()
-    await update.message.reply_text(message)
+    await update.message.reply_text(text=message)

@@ -35,7 +35,7 @@ def check_ip_blocked() -> Tuple[bool, str]:
         logger.error(f"检查IP状态失败: {str(e)}")
         raise
 
-def change_ip(api_url: str) -> bool:
+def change_ip(api_url: str) -> str:
     """更换IP地址"""
     try:
         cmd = "curl -s " + api_url

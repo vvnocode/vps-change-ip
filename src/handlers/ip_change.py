@@ -5,6 +5,7 @@ from config import config
 import time
 import os
 from handlers.user_check import check_user_permission
+from utils.logger import logger
 
 # 添加获取上次更换时间的函数
 def get_last_change_time() -> float:
@@ -29,12 +30,14 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await check_user_permission(update):
         return
     
+    user_id = update.effective_user.id
+    logger.info(f"收到 change 命令，用户ID: {user_id}")
+    
     # 检查更换间隔
     interval = config.get('ip_change_interval', 2) # 默认1分钟
     last_change = get_last_change_time()
     current_time = time.time()
     time_diff = (current_time - last_change) / 60  # 转换为分钟
-    
     if time_diff < interval:
         remaining = int(interval - time_diff)
         await update.message.reply_text(
@@ -43,7 +46,9 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
         
-    await update.message.reply_text("正在更换IP...")
+    await update.message.reply_text(
+        text="正在更换IP..."
+    )
     
     try:
         old_ip = get_current_ip()
@@ -69,4 +74,6 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("IP更换失败,请检查API")
     except Exception as e:
-        await update.message.reply_text(f"更换IP时出错: {str(e)}") 
+        await update.message.reply_text(
+            text=f"更换IP时出错: {str(e)}"
+        ) 

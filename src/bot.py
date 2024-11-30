@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import logging
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from config import config
 from handlers.ip_check import check_ip_status
 from handlers.ip_change import change_ip_handler
@@ -11,27 +10,21 @@ from utils.logger import logger
 
 class VPSChangeIPBot:
     def __init__(self):
-        self.config = config
-        print(f"Bot Token: {self.config['telegram_bot_token']}")
-        print(f"Chat ID: {self.config['telegram_chat_id']}")
         self.app = None
         
-    async def start(self, update: Update, context):
+    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """处理/start命令"""
 
         # 验证用户权限
         if not await check_user_permission(update):
             return
         
-        logger.info(f"收到 start 命令，用户ID: {update.effective_user.id}")
         user_id = update.effective_user.id
-        if str(user_id) != self.config["telegram_chat_id"]:
-            logger.warning(f"未授权用户尝试访问，用户ID: {user_id}")
-            await update.message.reply_text("未授权的用户")
-            return
+        logger.info(f"收到 start 命令，用户ID: {user_id}")
             
+        # 回复用户
         await update.message.reply_text(
-            "欢迎使用VPS IP更换工具\n"
+            text="欢迎使用VPS IP更换工具\n"
             "/check - 检查当前IP状态\n"
             "/change - 手动更换IP\n"
             "/quality - 检查IP质量"
@@ -40,7 +33,7 @@ class VPSChangeIPBot:
     def run(self):
         """运行机器人"""
         logger.info("机器人开始初始化...")
-        self.app = ApplicationBuilder().token(self.config["telegram_bot_token"]).build()
+        self.app = ApplicationBuilder().token(config["telegram_bot_token"]).build()
         
         # 添加命令处理器
         logger.info("注册命令处理器...")
