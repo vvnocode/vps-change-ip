@@ -1,8 +1,5 @@
 import subprocess
-from typing import Tuple, Optional
-import telegram
 import re
-from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes
 

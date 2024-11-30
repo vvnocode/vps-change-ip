@@ -133,29 +133,4 @@ case "$1" in
         ;;
 esac 
 # 重载systemd
-systemctl daemon-reload
-
-# 配置向导
-echo -e "\n=== 配置信息 ==="
-read -p "是否现在配置Bot? (y/N): " configure_now
-if [[ "$configure_now" =~ ^[Yy]$ ]]; then
-    read -p "请输入Telegram Bot Token: " bot_token
-    read -p "请输入Telegram Chat ID: " chat_id
-    read -p "请输入IP更换API地址: " ip_api
-    
-    # 更新配置文件
-    sed -i "s|^telegram_bot_token:.*|telegram_bot_token: \"$bot_token\"|" "$CONFIG_DIR/config.yaml"
-    sed -i "s|^telegram_chat_id:.*|telegram_chat_id: \"$chat_id\"|" "$CONFIG_DIR/config.yaml"
-    sed -i "s|^ip_change_api:.*|ip_change_api: \"$ip_api\"|" "$CONFIG_DIR/config.yaml"
-fi
-
-# 启动服务
-echo "启动服务..."
-systemctl enable vps-ip-bot
-systemctl start vps-ip-bot
-
-echo -e "\n=== 安装完成! ==="
-echo "配置文件位置: $CONFIG_DIR/config.yaml"
-echo "日志文件位置: $CONFIG_DIR/logs/bot.log"
-echo "使用以下命令管理服务:"
-echo "systemctl start/stop/restart vps-ip-bot" 
+systemctl daemon-reload 
