@@ -3,8 +3,7 @@ import logging
 import subprocess
 from typing import Tuple
 from config import config
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 def get_current_ip() -> str:
     """获取当前IP地址"""
@@ -39,9 +38,10 @@ def check_ip_blocked() -> Tuple[bool, str]:
 def change_ip(api_url: str) -> bool:
     """更换IP地址"""
     try:
-        response = requests.get(api_url, timeout=300)
-        if response.status_code == 200:
-            return response.content.strip() or "OK"
+        cmd = "curl -s " + api_url
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        response = result.stdout.strip()
+        return response
     except Exception as e:
         logger.error(f"更换IP失败: {str(e)}")
         return None 

@@ -7,12 +7,7 @@ from handlers.ip_check import check_ip_status
 from handlers.ip_change import change_ip_handler
 from handlers.ip_quality import ip_quality_handler
 from handlers.user_check import check_user_permission
-# 设置日志
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 class VPSChangeIPBot:
     def __init__(self):
