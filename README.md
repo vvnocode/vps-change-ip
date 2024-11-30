@@ -30,7 +30,7 @@ bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/
 ```yaml
 # Telegram配置
 telegram_bot_token: ""  # 你的Telegram Bot Token
-telegram_chat_id: ""    # 授权的Telegram用户ID
+telegram_chat_id: ""    # 授权的Telegram用户ID, 多个用户ID用逗号分隔
 
 # IP更换配置
 ip_check_cmd: "curl -s api-ipv4.ip.sb/ip"       # IP检查命令
