@@ -28,8 +28,9 @@ telegram_bot_token: ""  # 你的Telegram Bot Token
 telegram_chat_id: ""    # 授权的Telegram用户ID
 
 # IP更换配置
-ip_check_api: "https://api-ipv4.ip.sb/ip"       # IP检查API地址
-ip_change_api: ""      # IP更换API地址
+ip_check_cmd: "curl -s api-ipv4.ip.sb/ip"       # IP检查命令
+ip_check_api: ""       # IP检查API地址，idc提供。如果为空则使用ip_check_cmd
+ip_change_api: ""       # IP更换API地址，idc提供。
 ip_change_interval: 2  # IP更换最小间隔(分钟)
 ```
 

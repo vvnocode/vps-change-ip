@@ -9,8 +9,13 @@ logger = logging.getLogger(__name__)
 def get_current_ip() -> str:
     """获取当前IP地址"""
     try:
-        response = requests.get(config['ip_check_api'], timeout=10)
-        return response.text.strip()
+        if config['ip_check_api']:
+            response = requests.get(config['ip_check_api'], timeout=10)
+        else:
+            cmd = config['ip_check_cmd']
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            response = result.stdout.strip()
+        return response
     except Exception as e:
         logger.error(f"获取IP地址失败: {str(e)}")
         raise
