@@ -28,7 +28,7 @@ async def check_ip_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             await update.message.reply_text(
-                text=f"当前IP ({current_ip}) 状态正常"
+                text=f"当前IP ({current_ip}) 未被封锁"
             )
     except Exception as e:
         await update.message.reply_text(
