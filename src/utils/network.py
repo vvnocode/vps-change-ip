@@ -40,6 +40,7 @@ def change_ip(api_url: str) -> str:
     try:
         cmd = "curl -s " + api_url
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
+        logger.info(f"更换IP成功: {result.stdout}")
         response = result.stdout.strip()
         return response
     except Exception as e:
