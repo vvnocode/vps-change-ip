@@ -152,7 +152,7 @@ async def ip_quality_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not await check_user_permission(update):
         return
     
-    await update.message.reply_text("正在检测IP质量...")
+    await update.message.reply_text("正在检测IP质量，请勿重复发送命令...")
 
     message = await get_telegram_send_message()
     await update.message.reply_text(message)
