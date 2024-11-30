@@ -60,16 +60,26 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             update_last_change_time()
 
             if old_ip != new_ip:
-                await update.message.reply_text(
-                    f"IP更换成功!\n"
-                    f"旧IP: {old_ip}\n"
-                    f"新IP: {new_ip}"
-                )
+                await notify_ip_change_success(update, old_ip, new_ip)
             else:
                 await update.message.reply_text("IP更换可能未成功,新旧IP相同")
         else:
-            await update.message.reply_text("IP更换失败,请检查API")
+            # 再次校验IP是否更换成功
+            time.sleep(10)
+            new_ip = get_current_ip()
+            if old_ip != new_ip:
+                await notify_ip_change_success(update, old_ip, new_ip)
+            else:
+                await update.message.reply_text("IP更换失败,请检查API")
     except Exception as e:
         await update.message.reply_text(
             text=f"更换IP时出错: {str(e)}"
         ) 
+
+async def notify_ip_change_success(update: Update, old_ip, new_ip):
+    """通知IP更换成功"""
+    await update.message.reply_text(
+        f"IP更换成功!\n"
+        f"旧IP: {old_ip}\n"
+        f"新IP: {new_ip}"
+    )

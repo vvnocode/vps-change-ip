@@ -39,7 +39,7 @@ def change_ip(api_url: str) -> str:
     """更换IP地址"""
     try:
         cmd = "curl -s " + api_url
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=300)
         logger.info(f"更换IP成功: {result.stdout}")
         response = result.stdout.strip()
         return response
