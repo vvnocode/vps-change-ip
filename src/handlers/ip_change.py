@@ -59,11 +59,7 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # 更新最后更换时间
             update_last_change_time()
 
-            if new_ip == "OK":
-                await update.message.reply_text(
-                    f"IP更换执行完成，需要手动检查IP是否更换成功!"
-                )
-            elif old_ip != new_ip:
+            if old_ip != new_ip:
                 await update.message.reply_text(
                     f"IP更换成功!\n"
                     f"旧IP: {old_ip}\n"
