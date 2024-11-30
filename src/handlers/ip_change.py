@@ -65,11 +65,6 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"旧IP: {old_ip}\n"
                     f"新IP: {new_ip}"
                 )
-                # 等待5秒
-                time.sleep(5)
-                # 如果IP更换成功，检查IP质量
-                if get_current_ip() == new_ip:
-                    await ip_quality_handler(update, context)
             else:
                 await update.message.reply_text("IP更换可能未成功,新旧IP相同")
         else:
