@@ -1,5 +1,6 @@
 # vps-change-ip
 通过 Telegram Bot 管理和更换 VPS 的 IP 地址。
+[项目地址](https://github.com/vvnocode/vps-change-ip)
 
 ## 功能特点
 - 通过 Telegram Bot 远程操控
@@ -14,7 +15,7 @@
 ![](https://s1.locimg.com/2024/12/01/d96620e9dbfc4.png)
 ![](https://s1.locimg.com/2024/11/30/cf6d303bb8f8d.png)
 ![](https://s1.locimg.com/2024/11/30/467ca6e7a1756.png)
-![](https://s1.locimg.com/2024/11/30/59537c1773f4b.png)
+![](https://s1.locimg.com/2024/12/01/c1bcdfc43452b.png)
 ![](https://s1.locimg.com/2024/12/01/6b6e93ca8e9e7.png)
 
 ## 使用
