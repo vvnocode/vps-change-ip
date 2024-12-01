@@ -31,7 +31,9 @@ async def change_ip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     user_id = update.effective_user.id
-    logger.info(f"收到 change 命令，用户ID: {user_id}")
+    user_name = update.effective_user.username
+    full_name = update.effective_user.full_name
+    logger.info(f"收到 change 命令，用户ID: {user_id}，用户名: {user_name}，全名: {full_name}")
 
     # 检查是否配置了 ip_change_api
     if not config.get('ip_change_api'):

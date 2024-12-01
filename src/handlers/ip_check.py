@@ -12,7 +12,9 @@ async def check_ip_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     user_id = update.effective_user.id
-    logger.info(f"收到 check 命令，用户ID: {user_id}")
+    user_name = update.effective_user.username
+    full_name = update.effective_user.full_name
+    logger.info(f"收到 check 命令，用户ID: {user_id}，用户名: {user_name}，全名: {full_name}")
     
     await update.message.reply_text(
         text="正在检查IP状态..."

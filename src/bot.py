@@ -7,6 +7,7 @@ from handlers.ip_change import change_ip_handler
 from handlers.ip_quality import ip_quality_handler
 from handlers.user_check import check_user_permission
 from utils.logger import logger
+from handlers.ping import ping_handler
 
 class VPSChangeIPBot:
     def __init__(self):
@@ -20,14 +21,17 @@ class VPSChangeIPBot:
             return
         
         user_id = update.effective_user.id
-        logger.info(f"收到 start 命令，用户ID: {user_id}")
+        user_name = update.effective_user.username
+        full_name = update.effective_user.full_name
+        logger.info(f"收到 start 命令，用户ID: {user_id}，用户名: {user_name}，全名: {full_name}")
             
         # 回复用户
         await update.message.reply_text(
             text="欢迎使用VPS IP更换工具\n"
             "/check - 检查当前IP状态\n"
             "/change - 手动更换IP\n"
-            "/quality - 检查IP质量"
+            "/quality - 检查IP质量\n"
+            "/ping - 测试网络延迟。默认目标为1.1.1.1，可运行ping自定义命令如 /ping 8.8.8.8 -c 10"
         )
 
     def run(self):
@@ -41,6 +45,7 @@ class VPSChangeIPBot:
         self.app.add_handler(CommandHandler("check", check_ip_status))
         self.app.add_handler(CommandHandler("change", change_ip_handler))
         self.app.add_handler(CommandHandler("quality", ip_quality_handler))
+        self.app.add_handler(CommandHandler("ping", ping_handler))
         # 启动机器人
         logger.info("机器人开始运行...")
         self.app.run_polling()
