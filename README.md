@@ -7,13 +7,15 @@
 - 一键更换 VPS IP 地址
 - 检查 IP 质量（支持流媒体解锁检测）
 - 多重风险评估（SCAMALYTICS/ipapi/Cloudflare）
+- 网络延迟测试（支持自定义目标和参数）
 
 ## 功能截图
 
-![](https://s1.locimg.com/2024/11/30/aae6b66f3c1f2.png)
+![](https://s1.locimg.com/2024/12/01/d96620e9dbfc4.png)
 ![](https://s1.locimg.com/2024/11/30/cf6d303bb8f8d.png)
 ![](https://s1.locimg.com/2024/11/30/467ca6e7a1756.png)
 ![](https://s1.locimg.com/2024/11/30/59537c1773f4b.png)
+![](https://s1.locimg.com/2024/12/01/6b6e93ca8e9e7.png)
 
 ## 使用
 
@@ -39,6 +41,10 @@ ip_check_cmd: "curl -s api-ipv4.ip.sb/ip"       # IP检查命令
 ip_check_api: ""       # IP检查API地址，idc提供。如果为空则使用ip_check_cmd
 ip_change_api: ""       # IP更换API地址，idc提供。
 ip_change_interval: 2  # IP更换最小间隔(分钟)
+
+# Ping配置
+ping_target: "1.1.1.1"  # 默认ping目标
+ping_count: 10         # ping次数
 ```
 
 ### Telegram Bot 命令
@@ -46,6 +52,7 @@ ip_change_interval: 2  # IP更换最小间隔(分钟)
 - `/check` - 检查当前IP是否被封锁
 - `/change` - 手动更换IP地址
 - `/quality` - 检查IP质量（含流媒体解锁检测）
+- `/ping` - 测试网络延迟。支持自定义参数，例如：`/ping 8.8.8.8 -c 5`
 
 ### 服务管理
 ```bash
