@@ -53,7 +53,7 @@ async def ping_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ['ping', '-c', str(count), target],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=300
         )
         
         # 解析输出
