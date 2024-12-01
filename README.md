@@ -9,6 +9,7 @@
 - 检查 IP 质量（支持流媒体解锁检测）
 - 多重风险评估（SCAMALYTICS/ipapi/Cloudflare）
 - 网络延迟测试（支持自定义目标和参数）
+- 使用speedtest-cli进行测速
 
 ## 功能截图
 
@@ -17,6 +18,8 @@
 ![](https://s1.locimg.com/2024/11/30/467ca6e7a1756.png)
 ![](https://s1.locimg.com/2024/12/01/c1bcdfc43452b.png)
 ![](https://s1.locimg.com/2024/12/01/6b6e93ca8e9e7.png)
+![](https://s1.locimg.com/2024/12/01/2d24313b0d0f2.jpg)
+![](https://s1.locimg.com/2024/12/01/b23bd456f0b25.jpg)
 
 ## 使用
 
@@ -54,7 +57,7 @@ ping_count: 10         # ping次数
 - `/change` - 手动更换IP地址
 - `/quality` - 检查IP质量（含流媒体解锁检测）
 - `/ping` - 测试网络延迟。支持自定义参数，例如：`/ping 8.8.8.8 -c 5`
-
+- `/speedtest` - 测试网络速度
 ### 服务管理
 ```bash
 # 启动服务

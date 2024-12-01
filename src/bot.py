@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler
 from config import config
 from handlers.ip_check import check_ip_status
 from handlers.ip_change import change_ip_handler
@@ -8,6 +8,7 @@ from handlers.ip_quality import ip_quality_handler
 from handlers.user_check import check_user_permission
 from utils.logger import logger
 from handlers.ping import ping_handler
+from handlers.speedtest import speedtest_handler, speedtest_callback
 
 class VPSChangeIPBot:
     def __init__(self):
@@ -31,7 +32,8 @@ class VPSChangeIPBot:
             "/check - 检查当前IP状态\n"
             "/change - 手动更换IP\n"
             "/quality - 检查IP质量\n"
-            "/ping - 测试网络延迟。默认目标为1.1.1.1，可运行ping自定义命令如 /ping 8.8.8.8 -c 10"
+            "/ping - 测试网络延迟。默认目标为1.1.1.1，可运行ping自定义命令如 /ping 8.8.8.8 -c 10\n"
+            "/speedtest - 测试网络速度"
         )
 
     def run(self):
@@ -46,6 +48,8 @@ class VPSChangeIPBot:
         self.app.add_handler(CommandHandler("change", change_ip_handler))
         self.app.add_handler(CommandHandler("quality", ip_quality_handler))
         self.app.add_handler(CommandHandler("ping", ping_handler))
+        self.app.add_handler(CommandHandler("speedtest", speedtest_handler))
+        self.app.add_handler(CallbackQueryHandler(speedtest_callback, pattern="^speedtest_"))
         # 启动机器人
         logger.info("机器人开始运行...")
         self.app.run_polling()

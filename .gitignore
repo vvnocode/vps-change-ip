@@ -4,3 +4,4 @@ test*
 vps-change-ip
 venv/
 __pycache__/
+*.zip
