@@ -9,10 +9,10 @@ def get_current_ip() -> str:
     """获取当前IP地址"""
     try:
         if config['ip_check_api']:
-            response = requests.get(config['ip_check_api'], timeout=180)
+            response = requests.get(config['ip_check_api'], timeout=600)
         else:
             cmd = config['ip_check_cmd']
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=600)
             response = result.stdout.strip()
         return response
     except Exception as e:
@@ -27,7 +27,8 @@ def check_ip_blocked() -> Tuple[bool, str]:
         result = subprocess.run(
             ['ping', '-c', '5', '-W', '2', '-i', '0.2', 'www.itdog.cn'],
             capture_output=True,
-            text=True
+            text=True,
+            timeout=600
         )
         is_blocked = "100% packet loss" in result.stdout
         return is_blocked, ip
@@ -39,7 +40,7 @@ def change_ip(api_url: str) -> str:
     """更换IP地址"""
     try:
         cmd = "curl -s " + api_url
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=300)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=600)
         logger.info(f"更换IP成功: {result.stdout}")
         response = result.stdout.strip()
         return response

@@ -1,6 +1,6 @@
 import speedtest
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CallbackQueryHandler
+from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
 from utils.logger import logger
 
@@ -21,9 +21,9 @@ async def speedtest_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         servers = s.get_servers()
         best_server = s.get_best_server()
         
-        # 构建节点列表(最多显示5个最近的节点)
+        # 构建节点列表(显示所有节点)
         server_list = []
-        for distance, server_group in sorted(servers.items())[:5]:
+        for distance, server_group in sorted(servers.items()):
             for server in server_group:
                 server_list.append({
                     'id': server['id'],

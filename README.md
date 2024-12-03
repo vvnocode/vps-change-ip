@@ -29,11 +29,18 @@
 - 一定要在服务器上运行一次`bash <(curl -Ls IP.Check.Place)`，因为该脚本需要手动输入y才能继续
 
 ### 使用install.sh安装(推荐)
+
+1. 运行一键安装脚本
 ```bash
 bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/vps-change-ip/main/install.sh)
 ```
+2. 根据提示输入Telegram Bot Token和Chat ID
+3. 更换API接口为可选项
 
-### 配置文件
+### 手动修改配置文件
+
+安装完成后可以手动修改配置文件，修改完成后需要重启服务：`systemctl restart vps-ip-bot`
+
 配置文件位于 `/etc/vps-ip-bot/config.yaml`，示例：
 ```yaml
 # Telegram配置
