@@ -5,6 +5,33 @@ from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
 from utils.logger import logger
 command = "echo y | curl -Ls IP.Check.Place | bash"
+# IPinfo / ipregistry / ipapi / AbuseIPDB / IP2LOCATION / IPQS / DB-IP / SCAMALYTICS / IPWHOIS / Cloudflare
+RISK_SCORE_PROVIDERS = [
+    'IPinfo',
+    'ipregistry',
+    'ipapi',
+    'AbuseIPDB',
+    'IP2LOCATION',
+    'IPQS',
+    'DB-IP',
+    'SCAMALYTICS',
+    'IPWHOIS',
+    'Cloudflare'
+]
+
+def extract_risk_score(line, provider):
+    """从单行文本中提取特定提供商的风险评分
+    
+    Args:
+        line (str): 要解析的文本行
+        provider (str): 风险评分提供商名称
+    
+    Returns:
+        str or None: 提取到的风险评分，如果没有找到则返回 None
+    """
+    pattern = f'{provider}：\\s+([^|]*\\|\\w+风险)'
+    match = re.search(pattern, line)
+    return match.group(1) if match else None
 
 def clean_ansi_codes(text):
     """清理 ANSI 转义序列"""
@@ -66,18 +93,11 @@ def parse_ip_check_result(output_lines):
                 result['ip'] = ip_match.group(1)
         
         # 提取风险评分
-        if 'SCAMALYTICS：' in line:
-            match = re.search(r'SCAMALYTICS：\s+(\d+\|\w+风险)', line)
-            if match:
-                result['risk_scores']['SCAMALYTICS'] = match.group(1)
-        elif 'ipapi：' in line:
-            match = re.search(r'ipapi：\s+([\d.]+%\|\w+风险)', line)
-            if match:
-                result['risk_scores']['ipapi'] = match.group(1)
-        elif 'Cloudflare：' in line:
-            match = re.search(r'Cloudflare：\s+(\d+\|\w+风险)', line)
-            if match:
-                result['risk_scores']['Cloudflare'] = match.group(1)
+        for provider in RISK_SCORE_PROVIDERS:
+            if f'{provider}：' in line:
+                match = extract_risk_score(line, provider)
+                if match:
+                    result['risk_scores'][provider] = match
         
         # 检测流媒体部分
         if '五、流媒体及AI服务解锁检测' in line:
@@ -127,11 +147,11 @@ def format_telegram_message(parsed_data):
     message = f"""
 📍 IP: {parsed_data['ip']}
     
-🛡️ 风险评估:
-- SCAMALYTICS: {parsed_data['risk_scores'].get('SCAMALYTICS', 'N/A')}
-- ipapi: {parsed_data['risk_scores'].get('ipapi', 'N/A')}
-- Cloudflare: {parsed_data['risk_scores'].get('Cloudflare', 'N/A')}
-
+🛡️ 风险评估:"""
+    for provider, score in parsed_data['risk_scores'].items():
+        message += f"\n- {provider}: {score}"
+    
+    message += """
 🎬 流媒体解锁状态:"""
 
     for service, info in parsed_data['streaming'].items():
