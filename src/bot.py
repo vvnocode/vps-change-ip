@@ -8,7 +8,6 @@ from handlers.ip_quality import ip_quality_handler
 from handlers.user_check import check_user_permission
 from utils.logger import logger
 from handlers.ping import ping_handler
-from handlers.speedtest import speedtest_handler, speedtest_callback
 
 class VPSChangeIPBot:
     def __init__(self):
