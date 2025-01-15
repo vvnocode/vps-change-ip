@@ -61,11 +61,15 @@ install() {
     echo "下载并安装 speedtest-cli..."
     if ! curl -L -o "/tmp/install_speedtest.sh" "$SPEEDTEST_INSTALL_URL"; then
         echo -e "${RED}下载 speedtest 安装脚本失败${NC}"
-        exit 1
+        echo "继续安装其他组件..."
+    else
+        chmod +x "/tmp/install_speedtest.sh"
+        if ! bash "/tmp/install_speedtest.sh"; then
+            echo -e "${RED}安装 speedtest-cli 失败${NC}"
+            echo "继续安装其他组件..."
+        fi
+        rm -f "/tmp/install_speedtest.sh"
     fi
-    chmod +x "/tmp/install_speedtest.sh"
-    bash "/tmp/install_speedtest.sh"
-    rm -f "/tmp/install_speedtest.sh"
     
     # 如果服务正在运行，先停止它
     if systemctl is-active --quiet vps-ip-bot; then

@@ -79,7 +79,17 @@ main() {
             ;;
     esac
 
-    echo "Speedtest CLI 安装完成！"
+    # 检查 speedtest 是否安装成功
+    if command -v speedtest >/dev/null 2>&1; then
+        # 自动接受 speedtest 许可协议
+        echo "接受 Speedtest CLI 许可协议..."
+        echo "YES" | speedtest > /dev/null 2>&1
+        echo "Speedtest CLI 安装完成！"
+    else
+        echo "Speedtest CLI 安装失败或未找到命令"
+        echo "请手动安装 Speedtest CLI"
+    fi
+
     echo "运行 'speedtest' 命令来测试网速"
 }
 
