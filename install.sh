@@ -10,6 +10,7 @@ INSTALL_DIR="/etc/vps-ip-bot"
 REPO_URL="https://github.com/vvnocode/vps-change-ip"
 BINARY_URL="$REPO_URL/releases/latest/download/vps-ip-bot"
 CONFIG_URL="$REPO_URL/raw/main/config.yaml.example"
+SPEEDTEST_INSTALL_URL="$REPO_URL/raw/main/install_speedtest.sh"
 
 # 卸载函数
 uninstall() {
@@ -55,6 +56,16 @@ uninstall() {
 # 安装函数
 install() {
     echo -e "${GREEN}=== VPS IP更换工具安装 ===${NC}"
+    
+    # 下载并安装 speedtest-cli
+    echo "下载并安装 speedtest-cli..."
+    if ! curl -L -o "/tmp/install_speedtest.sh" "$SPEEDTEST_INSTALL_URL"; then
+        echo -e "${RED}下载 speedtest 安装脚本失败${NC}"
+        exit 1
+    fi
+    chmod +x "/tmp/install_speedtest.sh"
+    bash "/tmp/install_speedtest.sh"
+    rm -f "/tmp/install_speedtest.sh"
     
     # 如果服务正在运行，先停止它
     if systemctl is-active --quiet vps-ip-bot; then
