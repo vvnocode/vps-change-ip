@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
 from utils.logger import logger
-command = "yes y | curl -Ls IP.Check.Place | bash"
+command = "echo y | curl -Ls IP.Check.Place | bash"
 
 def clean_ansi_codes(text):
     """清理 ANSI 转义序列"""
