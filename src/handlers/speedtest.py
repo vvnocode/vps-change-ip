@@ -1,6 +1,5 @@
 import subprocess
 import json
-import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
@@ -66,12 +65,34 @@ async def speedtest_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.edit_message_text("正在进行测速...\n这可能需要几分钟时间...")
     
     try:
-        # 执行测速
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-        data = json.loads(result.stdout)
-        
-        # 格式化结果
-        message = f"""📊 测速结果:
+        # 首先尝试执行测速
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            
+            # 检查是否需要接受许可
+            if "Do you accept the license?" in result.stdout:
+                # 如果需要接受许可，重新运行命令并自动输入YES
+                process = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                output, error = process.communicate(input="YES\n")
+                
+                # 再次执行测速命令获取实际结果
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            
+            # 尝试解析JSON
+            try:
+                data = json.loads(result.stdout)
+            except json.JSONDecodeError:
+                await query.edit_message_text(f"测速结果解析失败。原始输出：\n{result.stdout[:3000]}")
+                return
+                
+            # 格式化结果
+            message = f"""📊 测速结果:
 
 🏢 测速节点: ({data['server']['location']}) ({data['server']['name']})
 🌍 位置: ({data['server']['country']})
@@ -82,10 +103,15 @@ async def speedtest_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 🔗 结果链接: {data.get('result', {}).get('url', 'N/A')}"""
 
-        await query.edit_message_text(message)
-        
-    except subprocess.TimeoutExpired:
-        await query.edit_message_text("测速超时，请稍后重试")
+            await query.edit_message_text(message)
+            
+        except subprocess.TimeoutExpired:
+            await query.edit_message_text("测速超时，请稍后重试")
+        except Exception as e:
+            error_message = f"测速过程出错: {str(e)}"
+            if hasattr(e, 'output'):
+                error_message += f"\n输出: {e.output}"
+            await query.edit_message_text(error_message)
     except Exception as e:
         logger.error(f"测速失败: {str(e)}")
         await query.edit_message_text(f"测速失败: {str(e)}")

@@ -63,6 +63,14 @@ install_freebsd() {
 # 主函数
 main() {
     detect_os
+    
+    # 首先检查 speedtest 命令是否已存在
+    if command -v speedtest >/dev/null 2>&1; then
+        echo "Speedtest CLI 已安装，无需重新安装"
+        exit 0
+    fi
+
+    # 如果命令不存在，则根据系统类型进行安装
     case "$OS" in
         *Ubuntu*|*Debian*)
             install_debian
@@ -79,18 +87,14 @@ main() {
             ;;
     esac
 
-    # 检查 speedtest 是否安装成功
+    # 检查安装结果
     if command -v speedtest >/dev/null 2>&1; then
-        # 自动接受 speedtest 许可协议
-        echo "接受 Speedtest CLI 许可协议..."
-        echo "YES" | speedtest > /dev/null 2>&1
-        echo "Speedtest CLI 安装完成！"
+        echo "Speedtest CLI 安装成功！"
     else
-        echo "Speedtest CLI 安装失败或未找到命令"
-        echo "请手动安装 Speedtest CLI"
+        echo "Speedtest CLI 安装失败"
+        echo "请检查安装日志并手动安装"
+        exit 1
     fi
-
-    echo "运行 'speedtest' 命令来测试网速"
 }
 
 main
