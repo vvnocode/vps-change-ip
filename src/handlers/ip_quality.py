@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from handlers.user_check import check_user_permission
 from utils.logger import logger
-command = "echo y | curl -Ls IP.Check.Place | bash"
+command = "yes | bash <(curl -Ls IP.Check.Place)"
 # IPinfo / ipregistry / ipapi / AbuseIPDB / IP2LOCATION / IPQS / DB-IP / SCAMALYTICS / IPWHOIS / Cloudflare
 RISK_SCORE_PROVIDERS = [
     'IPinfo',
