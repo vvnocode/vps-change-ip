@@ -19,8 +19,12 @@ async def speedtest_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     try:
         # 获取服务器列表
-        result = subprocess.run(['speedtest', '-L', '--format=json'], 
+        result = subprocess.run(['speedtest', '-L', '--accept-license', '--accept-gdpr', '--format=json'], 
                               capture_output=True, text=True, timeout=30)
+        # '[2025-03-02 21:18:56.695] [error] Limit reached:\n\nSpeedtest CLI. Too many requests received. To maintain a fair and stable environment, please review and adjust the frequency of your requests.\n'
+        if "Limit reached" in result.stderr:
+            await update.message.reply_text("测速超过次数限制，请稍后再试")
+            return
         servers = json.loads(result.stdout)['servers']
         
         # 构建内联键盘
@@ -58,31 +62,16 @@ async def speedtest_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     server_id = query.data.split("_")[1]
     
     # 构建命令
-    cmd = ['speedtest', '--format=json']
+    cmd = ['speedtest', '--accept-license', '--accept-gdpr', '--format=json']
     if server_id != 'auto':
         cmd.extend(['-s', server_id])
     
     await query.edit_message_text("正在进行测速...\n这可能需要几分钟时间...")
     
     try:
-        # 首先尝试执行测速
+        # 执行测速
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-            
-            # 检查是否需要接受许可
-            if "Do you accept the license?" in result.stdout:
-                # 如果需要接受许可，重新运行命令并自动输入YES
-                process = subprocess.Popen(
-                    cmd,
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-                output, error = process.communicate(input="YES\n")
-                
-                # 再次执行测速命令获取实际结果
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             
             # 尝试解析JSON
             try:
